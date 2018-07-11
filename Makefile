@@ -1,19 +1,31 @@
-TARGET = newfrzns
-SRC_DIRS = ./src
-INC_DIRS ?= ./include
+TARGET := newfrzns
+SRC_DIRS := src
+INC_DIRS := include
+OBJ_DIR := .o
+DEP_DIR := .d
 
 SRCS := $(wildcard $(SRC_DIRS)/*.cpp)
-OBJS := $(SRCS:.cpp=.o)
-DEPS := $(OBJS:.o=.d)
+#$(info $(SRCS))
+OBJS := $(patsubst %,$(OBJDIR)%.o,$(basename $(SRCS)))
+#$(info $(OBJS))
+DEPS := $(patsubst %,$(DEPDIR)%.d,$(basename $(SRCS)))
 
-LD_FLAGS = -lc -lSDL2 -lSDL2_image
+$(shell mkdir -p $(dir $(OBJS)) >/dev/null)
+$(shell mkdir -p $(dir $(DEPS)) >/dev/null)
 
-INC_FLAGS := $(addprefix -I,$(INC_DIRS))
+CPP := g++
+LD  := g++
 
-CPPFLAGS ?= $(INC_FLAGS) -std=c++11 -Wall -pedantic
+INCFLAGS := $(addprefix -I,$(INC_DIRS))
+CPPFLAGS := $(INCFLAGS) -std=c++11 -Wall -pedantic
+LDFLAGS := 
+DEPFLAGS := -MT $@ -MD -MP -MF $(DEP_DIR)/$*.Td
+
+LD_LIBS := -lc -lSDL2 -lSDL2_image
+
 
 $(TARGET): $(OBJS)
-	$(LD) -o $@ $^ $(LD_FLAGS)
+	$(LD) $(LDFLAGS)$^ $(LD_LIBS) -o $@ 
 
 %.d: %.cpp
 	$(CPP) $(CPPFLAGS) $< -MM -MT $(@:.d=.o) >$@
