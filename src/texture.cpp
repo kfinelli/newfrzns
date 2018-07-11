@@ -1,16 +1,24 @@
+#include "texture.hpp"
+
 texture::texture() :
-  mTexture(nullptr, SDL_DestroyTexture), mWidth(0), mHeight(0) {
+  mTexture(nullptr, SDL_DestroyTexture), 
+  mRenderer(nullptr),
+      mWidth(0), mHeight(0) {
   }
 
-texture::~texture() {};
+texture::~texture() {}
 
 statusCode texture::reset() {
   mWidth = mHeight = 0;
   return statusCode::kSuccess;
 }
 
+statusCode texture::init(std::shared_ptr<SDL_Renderer> renderer) {
+  mRenderer = renderer;
+  return statusCode::kSuccess;
+}
 
-statusCode texture::load_from_file(std::string f) {
+statusCode texture::load_from_file(std::string path) {
   reset();
 
   //Load image at specified path
@@ -23,7 +31,7 @@ statusCode texture::load_from_file(std::string f) {
   SDL_SetColorKey( loadedSurface.get(), SDL_TRUE, SDL_MapRGB( loadedSurface->format, 0, 0xFF, 0xFF ) );
 
   //Create texture from surface pixels
-  mTexture.reset(SDL_CreateTextureFromSurface( gRenderer.get(), loadedSurface.get() ));
+  mTexture.reset(SDL_CreateTextureFromSurface( mRenderer.get(), loadedSurface.get() ));
 
   if(CHECK(mTexture != nullptr, "Unable to create texture from %s, SDL Error: %s\n", path.c_str(), SDL_GetError() ) == statusCode::kFail) {return statusCode::kFail;}
 
@@ -36,6 +44,7 @@ statusCode texture::load_from_file(std::string f) {
 
 }
 
-statusCode texture::render() {
+statusCode texture::render(int x, int y, SDL_Rect *clip) {
+  return statusCode::kSuccess;
 
 }

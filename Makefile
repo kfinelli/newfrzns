@@ -1,17 +1,22 @@
-TARGET ?= newfrzns
-SRC_DIRS ?= ./src
+TARGET = newfrzns
+SRC_DIRS = ./src
+INC_DIRS ?= ./include
 
-SRCS := $(shell find $(SRC_DIRS) -name *.cpp)
-OBJS := $(addsuffix .o,$(basename $(SRCS)))
+SRCS := $(wildcard $(SRC_DIRS)/*.cpp)
+OBJS := $(SRCS:.cpp=.o)
 DEPS := $(OBJS:.o=.d)
 
-INC_DIRS := $(shell find $(SRC_DIRS) -type d)
+LD_FLAGS = -lc -lSDL2 -lSDL2_image
+
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
-CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
+CPPFLAGS ?= $(INC_FLAGS) -std=c++11 -Wall -pedantic
 
 $(TARGET): $(OBJS)
-	$(CC) $(LDFLAGS) $(OBJS) -o $@ $(LOADLIBES) $(LDLIBS)
+	$(LD) -o $@ $^ $(LD_FLAGS)
+
+%.d: %.cpp
+	$(CPP) $(CPPFLAGS) $< -MM -MT $(@:.d=.o) >$@
 
 .PHONY: clean
 clean:
